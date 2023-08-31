@@ -98,7 +98,7 @@ router.post("/signin", async (req, res, next) => {
 
 			//! Sending the authToken to the client !
 
-			res.status(200).json({ authToken })
+			res.status(200).json({ authToken,id:user._id })
 		} else {
 			res.status(401).json("Can you check your typos ?")
 		}

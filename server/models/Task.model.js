@@ -16,7 +16,7 @@ const taskSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    todoList: { type: Schema.Types.ObjectId, ref: "todoList" },
+    todoList: { type: Schema.Types.ObjectId, ref: "TodoList" , required : true},
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

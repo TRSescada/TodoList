@@ -24,4 +24,4 @@ const todoListSchema = new Schema(
   }
 );
 
-module.exports = model("todoList", todoListSchema);
+module.exports = model("TodoList", todoListSchema);

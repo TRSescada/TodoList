@@ -3,6 +3,7 @@ const isAuthenticated = require("../middlewares/jwt.middleware");
 const protectRoute = require("../middlewares/protectRoute");
 const todoList = require("../models/todoList.model");
 const User = require("../models/User.model");
+const Task = require("../models/Task.model");
 
 // CREATE a new todolist
 router.post("/", isAuthenticated, async (req, res) => {
@@ -23,8 +24,13 @@ router.post("/", isAuthenticated, async (req, res) => {
 
 //GET all todoList
 router.get("/", isAuthenticated, async (req, res) => {
-  const todoLists = await todoList.find().populate("tasks");
-  res.json(todoLists);
+  try {
+    const populatedTodoLists = await todoList.find().populate("tasks");
+    res.json(populatedTodoLists);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // READ a single todolist by ID
@@ -55,5 +61,31 @@ router.delete("/:id", isAuthenticated, (req, res) => {
     .then(() => res.status(204).end())
     .catch((error) => res.status(404).json({ error: "todoList not found" }));
 });
+
+router.get("/findByUserId/:id", isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const todoLists = await todoList.find({ user: id });
+
+    const todoListsWithCompletion = await Promise.all(
+      todoLists.map(async todoList => {
+        const tasks = await Task.find({ todoList: todoList._id });
+        const allTasksCompleted = tasks.every(task => task.completed);
+        
+        return {
+          ...todoList.toObject(),
+          tasks,
+          allTasksCompleted,
+        };
+      })
+    );
+
+    res.json(todoListsWithCompletion);
+  } catch (error) {
+    console.error(error);  // Log the error for debugging
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 module.exports = router;

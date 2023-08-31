@@ -4,7 +4,7 @@ const protectRoute = require("../middlewares/protectRoute");
 const Task = require("../models/Task.model");
 
 // GET  - get all tasks for a list
-router.get("/:id", isAuthenticated, async (req, res, next) => {
+router.get("/", isAuthenticated, async (req, res, next) => {
   try {
     const tasks = await Task.find({ list: req.params.listId });
     res.json(tasks);
@@ -14,12 +14,12 @@ router.get("/:id", isAuthenticated, async (req, res, next) => {
 });
 
 // POST /lists/:listId/tasks - create a new task for a list
-router.post("/:id", isAuthenticated, async (req, res, next) => {
+router.post("/", isAuthenticated, async (req, res, next) => {
   try {
     const task = new Task({
       title: req.body.title,
       description: req.body.description,
-      list: req.params.listId,
+      todoList: req.body.todoList,
     });
     const savedTask = await task.save();
     res.json(savedTask);
@@ -47,6 +47,7 @@ router.put("/:taskId", isAuthenticated, async (req, res, next) => {
         title: req.body.title,
         description: req.body.description,
         completed: req.body.completed,
+        todoList: req.body.todoList,
       },
       { new: true }
     );
@@ -63,6 +64,18 @@ router.delete("/:taskId", isAuthenticated, async (req, res, next) => {
     res.json(task);
   } catch (err) {
     next(err);
+  }
+});
+router.get('/tasks/:todoListId', isAuthenticated, async (req, res) => {
+  try {
+    const { todoListId } = req.params;
+
+    const tasks = await Task.find({ todoList:todoListId });
+    
+    res.json(tasks);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
